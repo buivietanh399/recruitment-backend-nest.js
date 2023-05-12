@@ -35,10 +35,7 @@ export class CompaniesService {
 
     const totalItems = (await this.companyModel.find(filter)).length;
     const totalPages = Math.ceil(totalItems / defaultLimit);
-    if (isEmpty(sort)) {
-      // @ts-ignore: Unreachable code error
-      sort = '-updatedAt';
-    }
+
     const result = await this.companyModel
       .find(filter)
       .skip(offset)
