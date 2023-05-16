@@ -40,10 +40,10 @@ export class Company {
   updatedAt: Date;
 
   @Prop()
-  isDelete: boolean;
+  isDeleted: boolean;
 
   @Prop()
-  deleteAt: Date;
+  deletedAt: Date;
 }
 
 export const CompanySchema = SchemaFactory.createForClass(Company);
