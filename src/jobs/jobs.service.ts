@@ -1,28 +1,56 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { CreateCompanyDto } from './dto/create-company.dto';
-import { UpdateCompanyDto } from './dto/update-company.dto';
+import { CreateJobDto } from './dto/create-Job.dto';
+import { UpdateJobDto } from './dto/update-Job.dto';
 import { InjectModel } from '@nestjs/mongoose';
-import { CompanyDocument } from './schemas/company.schema';
+import { JobDocument } from './schemas/Job.schema';
 import { SoftDeleteModel } from 'soft-delete-plugin-mongoose';
-import { Company } from './schemas/company.schema';
+import { Job } from './schemas/Job.schema';
 import { IUser } from '@/users/users.interface';
 import aqp from 'api-query-params';
 import { isEmpty } from 'class-validator';
+
 @Injectable()
-export class CompaniesService {
+export class JobsService {
   constructor(
-    @InjectModel(Company.name)
-    private companyModel: SoftDeleteModel<CompanyDocument>,
+    @InjectModel(Job.name)
+    private JobModel: SoftDeleteModel<JobDocument>,
   ) {}
 
-  create(createCompanyDto: CreateCompanyDto, user: IUser) {
-    return this.companyModel.create({
-      ...createCompanyDto,
+  async create(createJobDto: CreateJobDto, user: IUser) {
+    const {
+      name,
+      skills,
+      company,
+      salary,
+      quantity,
+      level,
+      description,
+      startDate,
+      endDate,
+      isActive,
+    } = createJobDto;
+
+    let newJob = await this.JobModel.create({
+      name,
+      skills,
+      company,
+      salary,
+      quantity,
+      level,
+      description,
+      startDate,
+      endDate,
+      isActive,
       createdBy: {
         _id: user._id,
         email: user.email,
       },
     });
+
+    return {
+      _id: newJob?._id,
+      createdAt: newJob?.createdAt,
+    };
   }
 
   async findAll(currentPage: number, limit: number, qs: string) {
@@ -33,11 +61,10 @@ export class CompaniesService {
     let offset = (+currentPage - 1) * +limit;
     let defaultLimit = +limit ? +limit : 10;
 
-    const totalItems = (await this.companyModel.find(filter)).length;
+    const totalItems = (await this.JobModel.find(filter)).length;
     const totalPages = Math.ceil(totalItems / defaultLimit);
 
-    const result = await this.companyModel
-      .find(filter)
+    const result = await this.JobModel.find(filter)
       .skip(offset)
       .limit(defaultLimit)
       // @ts-ignore: Unreachable code error
@@ -56,15 +83,15 @@ export class CompaniesService {
     };
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} company`;
+  findOne(id: string) {
+    return `This action returns a #${id} Job`;
   }
 
-  async update(id: string, updateCompanyDto: UpdateCompanyDto, user: IUser) {
-    return await this.companyModel.updateOne(
+  async update(id: string, updateJobDto: UpdateJobDto, user: IUser) {
+    return await this.JobModel.updateOne(
       { _id: id },
       {
-        ...updateCompanyDto,
+        ...updateJobDto,
         updatedBy: {
           _id: user._id,
           email: user.email,
@@ -75,7 +102,7 @@ export class CompaniesService {
 
   async remove(id: string, user: IUser) {
     // update deletedBy
-    await this.companyModel.updateOne(
+    await this.JobModel.updateOne(
       {
         _id: id,
       },
@@ -87,7 +114,7 @@ export class CompaniesService {
       },
     );
 
-    return this.companyModel.softDelete({
+    return this.JobModel.softDelete({
       _id: id,
     });
   }
