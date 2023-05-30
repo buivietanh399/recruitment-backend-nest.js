@@ -38,12 +38,11 @@ export class JobsController {
   @Get(':id')
   @Public()
   @ResponseMessage('Fetch job by id')
-  async findOne(
+  findOne(
     @Param('id')
     id: string,
   ) {
-    const foundjob = this.jobsService.findOne(id);
-    return foundjob;
+    return this.jobsService.findOne(id);
   }
 
   @Patch(':id')
