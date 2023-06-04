@@ -114,13 +114,17 @@ export class UsersService {
       .findOne({
         _id: id,
       })
-      .select('-password'); // exclude >< include
+      .select('-password')
+      .populate({ path: 'role', select: { name: 1, _id: 1 } }); // exclude >< include
+    // exclude >< include
   }
 
   findOneByUsername(username: string) {
-    return this.userModel.findOne({
-      email: username,
-    });
+    return this.userModel
+      .findOne({
+        email: username,
+      })
+      .populate({ path: 'role', select: { name: 1, permissions: 1 } });
   }
 
   isValidPassword(password: string, hash: string) {
@@ -143,6 +147,11 @@ export class UsersService {
   }
 
   async remove(id: string, user: IUser) {
+    const foundUser = await this.userModel.findById(id);
+    if (foundUser.email === 'admin@gmail.com') {
+      throw new BadRequestException('Không thể xóa tài khoản admin@gmail.com');
+    }
+
     if (!mongoose.Types.ObjectId.isValid(id)) return `not found user`;
 
     await this.userModel.updateOne(

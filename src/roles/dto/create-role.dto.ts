@@ -17,7 +17,7 @@ export class CreateRoleDto {
 
   @IsNotEmpty({ message: 'idActive không được để trống' })
   @IsBoolean({ message: 'isActive có giá trị boolean' })
-  idActive: boolean;
+  isActive: boolean;
 
   @IsNotEmpty({ message: 'Logo không được để trống' })
   @IsMongoId({ each: true, message: 'each permission is mongo object id' })

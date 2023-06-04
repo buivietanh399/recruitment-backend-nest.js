@@ -1,6 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import mongoose, { HydratedDocument } from 'mongoose';
-import { IsEmail } from 'class-validator';
 
 export type PermissionDocument = HydratedDocument<Permission>;
 
@@ -16,7 +15,7 @@ export class Permission {
   method: string;
 
   @Prop()
-  module: number;
+  module: string;
 
   @Prop({ type: Object })
   createdBy: {
