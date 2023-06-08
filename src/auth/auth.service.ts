@@ -7,6 +7,7 @@ import { ConfigService } from '@nestjs/config';
 import ms from 'ms';
 import { Response, response } from 'express';
 import cookieParser from 'cookie-parser';
+import { RolesService } from '@/roles/roles.service';
 
 @Injectable()
 export class AuthService {
@@ -14,6 +15,7 @@ export class AuthService {
     private usersService: UsersService,
     private jwtService: JwtService,
     private configService: ConfigService,
+    private rolesService: RolesService,
   ) {}
 
   //ussername/ pass là 2 tham số thư viện passport nó ném về
@@ -22,7 +24,14 @@ export class AuthService {
     if (user) {
       const isValid = this.usersService.isValidPassword(pass, user.password);
       if (isValid === true) {
-        return user;
+        const userRole = user.role as unknown as { _id: string; name: string };
+        const temp = await this.rolesService.findOne(userRole._id);
+
+        const objUser = {
+          ...user.toObject(),
+          permissions: temp?.permissions ?? [],
+        };
+        return objUser;
       }
     }
 
@@ -30,7 +39,7 @@ export class AuthService {
   }
 
   async login(user: IUser, response: Response) {
-    const { _id, name, email, role } = user;
+    const { _id, name, email, role, permissions } = user;
     const payload = {
       sub: 'token login',
       iss: 'from server',
@@ -44,6 +53,10 @@ export class AuthService {
 
     //update user with refresh token
     await this.usersService.updateUserToken(refresh_token, _id);
+
+    // fetch user's role
+    const userRole = user.role as unknown as { _id: string; name: string };
+    const temp = await this.rolesService.findOne(userRole._id);
 
     //set refresh token as cookies
     response.cookie('refresh_token', refresh_token, {
@@ -59,6 +72,7 @@ export class AuthService {
         name,
         email,
         role,
+        permissions: temp?.permissions ?? [],
       },
     };
   }
