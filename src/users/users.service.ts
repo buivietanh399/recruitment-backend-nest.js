@@ -70,7 +70,7 @@ export class UsersService {
     }
 
     //fetch user role
-    const userRole = await this.userModel.findOne({ name: USER_ROLE });
+    const userRole = await this.roleModel.findOne({ name: USER_ROLE });
 
     const hashPassword = this.getHashPassword(password);
     let newRegister = await this.userModel.create({

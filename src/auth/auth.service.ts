@@ -24,7 +24,12 @@ export class AuthService {
     if (user) {
       const isValid = this.usersService.isValidPassword(pass, user.password);
       if (isValid === true) {
-        const userRole = user.role as unknown as { _id: string; name: string };
+        const userRole = user.role as unknown as {
+          _id: string;
+          name: string;
+        };
+        //console.log(userRole);
+
         const temp = await this.rolesService.findOne(userRole._id);
 
         const objUser = {
@@ -54,10 +59,6 @@ export class AuthService {
     //update user with refresh token
     await this.usersService.updateUserToken(refresh_token, _id);
 
-    // fetch user's role
-    const userRole = user.role as unknown as { _id: string; name: string };
-    const temp = await this.rolesService.findOne(userRole._id);
-
     //set refresh token as cookies
     response.cookie('refresh_token', refresh_token, {
       httpOnly: true,
@@ -72,7 +73,7 @@ export class AuthService {
         name,
         email,
         role,
-        permissions: temp?.permissions ?? [],
+        permissions,
       },
     };
   }
@@ -118,6 +119,10 @@ export class AuthService {
         // update user with refresh token
         await this.usersService.updateUserToken(refresh_token, _id.toString());
 
+        // fetch user's role
+        const userRole = user.role as unknown as { _id: string; name: string };
+        const temp = await this.rolesService.findOne(userRole._id);
+
         //set refresh token as cookies
         response.clearCookie('refresh_token');
 
@@ -129,7 +134,13 @@ export class AuthService {
 
         return {
           access_token: this.jwtService.sign(payload),
-          user: { _id, name, email, role },
+          user: {
+            _id,
+            name,
+            email,
+            role,
+            permissions: temp?.permissions ?? [],
+          },
         };
       } else {
         throw new BadRequestException(

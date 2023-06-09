@@ -14,6 +14,7 @@ import { RegisterUserDto } from '@/users/dto/create-user.dto';
 import { Request, Response } from 'express';
 import { IUser } from '@/users/users.interface';
 import { RolesService } from '../roles/roles.service';
+
 @Controller('auth')
 export class AuthController {
   constructor(
